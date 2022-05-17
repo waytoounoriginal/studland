@@ -90,6 +90,12 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Palette.raisinBlack,),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         backgroundColor: Colors.grey[50],
         elevation: 0,
         title: Text('Coupons', style: TextStyle(color: Palette.raisinBlack)),
@@ -148,7 +154,7 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                       height: MediaQuery.of(context).size.height * 0.5,
                       aspectRatio: 2,
                       viewportFraction: 0.5,
-                      enableInfiniteScroll: false,
+                      enableInfiniteScroll: true,
                       initialPage: 0,
                       reverse: false,
                       autoPlay: false,
