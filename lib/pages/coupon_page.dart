@@ -40,8 +40,8 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
   ];
 
   var textColor;
+  bool loading = true;
 
-  late AnimationController _controller;
 
   Color contColor = Colors.white;
   double contHeight = 300;
@@ -58,7 +58,6 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _controller.dispose();
     coupons.clear();
     super.dispose();
   }
@@ -134,6 +133,7 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
       print(stacktrace);
       //return 'Cannot connect. Please try again later.';
     }
+    loading = false;
     return 1;
   }
 
@@ -176,10 +176,7 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
   @override
   void initState() {
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 500),
-    );
+    loading = true;
 
     _getCoupons();
     index = 1;
@@ -298,11 +295,12 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                     ),
                   )
                       : Center(
-                          child: FadeTransition(
-                            opacity: Tween<double>(begin: 0, end: 1).animate(_controller..forward()),
-
-                            child: Text('No coupons available :(', style: TextStyle(fontSize: 20, color: Palette.raisinBlack.withOpacity(0.5)),),
+                          child: loading
+                              ? CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Palette.carGreen),
                           )
+                              : Text('No coupons available :(', style: TextStyle(fontSize: 20, color: Palette.raisinBlack.withOpacity(0.5)),)
                         ),
                   )
               ],
@@ -362,12 +360,15 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                           ],
                         ),
                         const SizedBox(height: 10,),
-                        Text(
-                          'Valid between ${validity.toString()}',
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: textColor.withOpacity(0.5)
+                        FittedBox(
+                          fit: BoxFit.contain,
+                          child: Text(
+                            'Validity: ${validity.toString()}',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: textColor.withOpacity(0.5)
+                            ),
                           ),
                         ),
                         const SizedBox(height: 25,),
@@ -537,6 +538,7 @@ class _QRScanPageState extends State<QRScanPage> {
 
   }
 
+  DateTime? lastScan;
 
 
   @override
@@ -574,49 +576,61 @@ class _QRScanPageState extends State<QRScanPage> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) async {
-      controller.pauseCamera();
-      if(checkCode(scanData)){
+      final currentScan = DateTime.now();
+      if (lastScan == null || currentScan.difference(lastScan!) > const Duration(seconds: 1)) {
+        lastScan = currentScan;
 
-        try {
-          var url = Uri.parse('https://automemeapp.com/StudLand/scan.php');
-          final response = await http.post(url, body: {
-            'index': index.toString(),
-          });
-          if (response.statusCode != 200) {
+        controller.pauseCamera();
+        if(checkCode(scanData)){
 
-          } else {
-            var jsondata = json.decode(response.body);
-            print(jsondata);
+          try {
+            var url = Uri.parse('https://automemeapp.com/StudLand/scan.php');
+            final response = await http.post(url, body: {
+              'id': scanData.code.toString(),
+            });
+            if (response.statusCode != 200) {
 
-            if (jsondata['error']) {
-              _scaffoldKey.currentState!.showSnackBar(SnackBar(
-                content: Text(jsondata['message'], style: const TextStyle(fontFamily: 'Nunito'),),
-                backgroundColor: Colors.red,
-              ));
+            } else {
+              var jsondata = json.decode(response.body);
+              print(jsondata);
+              print(index);
+
+              if (jsondata['error']) {
+                _scaffoldKey.currentState!.showSnackBar(SnackBar(
+                  content: Text(jsondata['message'], style: const TextStyle(fontFamily: 'Nunito'),),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ));
+                controller.resumeCamera();
+              }
+
+              if(jsondata['success']){
+                _scaffoldKey.currentState!.showSnackBar(SnackBar(
+                  content: Text(jsondata['message'], style: const TextStyle(fontFamily: 'Nunito'),),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                ));
+
+                await Future.delayed(Duration(seconds: 2));
+
+                Navigator.pop(_scaffoldKey.currentState!.context);
+              }
+
+
+
             }
-
-            if(jsondata['success']){
-              _scaffoldKey.currentState!.showSnackBar(SnackBar(
-                content: Text(jsondata['message'], style: const TextStyle(fontFamily: 'Nunito'),),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ));
-              Navigator.pop(_scaffoldKey.currentState!.context);
-            }
-
-
-
+          } catch(e, stacktrace) {
+            print(e);
+            print(stacktrace);
+            _scaffoldKey.currentState!.showSnackBar(SnackBar(
+              content: Text('Error: $e', style: const TextStyle(fontFamily: 'Nunito'),),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ));
+            controller.resumeCamera();
           }
-        } catch(e, stacktrace) {
-          print(e);
-          print(stacktrace);
-         _scaffoldKey.currentState!.showSnackBar(SnackBar(
-           content: Text('Error: $e', style: const TextStyle(fontFamily: 'Nunito'),),
-           backgroundColor: Colors.red,
-           behavior: SnackBarBehavior.floating,
-         ));
-          controller.resumeCamera();
-        }
+      }
+
 
 
 
@@ -633,7 +647,7 @@ class _QRScanPageState extends State<QRScanPage> {
     var data = code!.code;
     for(var i = 0; i < widget.lista.length; i++){
       if(data == widget.lista[i].qrCode){
-        index = i;
+        index = i + 2;
         return true;
       }
     }
