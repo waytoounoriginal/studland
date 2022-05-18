@@ -14,35 +14,41 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-// Hardcoded username and password
-const users = {
-  'cosma@gmail.com': 'cosma',
-  'test@gmail.com': 'test',
-};
 
 class _LoginState extends State<Login> {
 
   Duration get loginTime => const Duration(milliseconds: 0);
 
-  Future<String?> _authUser(LoginData data) {
-    debugPrint('Name: ${data.name}, Password: ${data.password}');
-    return Future.delayed(loginTime).then((_) {
-      if (!users.containsKey(data.name)) {
-        return 'User does not exist.';
+  Future<String?> _authUser(LoginData data) async {
+    try {
+      var url = Uri.parse('https://automemeapp.com/StudLand/login.php');
+      final response = await http.post(url, body: {
+        'email': data.name,
+        'password': data.password,
+      });
+      if(response.statusCode != 200) {
+        return 'Cannot connect. Please try again later.';
+      } else {
+        var jsondata = json.decode(response.body);
+        print(jsondata);
+
+        if(jsondata['error']){
+          return jsondata['message'];
+        }
+
+        if(jsondata['success']){
+          return null;
+        }
+
       }
-      if (users[data.name] != data.password) {
-        return 'Passwords do not match.';
-      }
-      return null;
-    });
+    } catch(e) {
+      print(e);
+      return 'Cannot connect. Please try again later.';
+    }
   }
 
   Future<String?> _signupUser(SignupData data) async {
-    // debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
-    // return Future.delayed(loginTime).then((_) {
-    //   users.addAll({data.name!: data.password!});
-    //   return null;
-    // });
+
     try {
       var url = Uri.parse('https://automemeapp.com/StudLand/register.php');
       final response = await http.post(url, body: {
@@ -71,14 +77,8 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future<String?> _recoverPassword(String name) {
-    debugPrint('Name: $name');
-    return Future.delayed(loginTime).then((_) {
-      if (!users.containsKey(name)) {
-        return 'User not exists';
-      }
-      return null;
-    });
+  Future<String?> _recoverPassword(String name) async {
+
   }
 
 

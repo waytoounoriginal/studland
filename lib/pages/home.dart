@@ -83,8 +83,8 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 20),
             Container(
-              padding: EdgeInsets.fromLTRB(20, 10, 20, 20),
-              height: MediaQuery.of(context).size.height,
+              padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+              height: MediaQuery.of(context).size.height - 50,
               width: MediaQuery.of(context).size.width,
               decoration: const BoxDecoration(
                 color: Palette.ghostWhite,
@@ -108,7 +108,7 @@ class _HomeState extends State<Home> {
                   const SizedBox(height: 80),
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
-                    height: 320,
+                    height: 300,
                     child: CarouselSlider(
                       items: [
                         Padding(

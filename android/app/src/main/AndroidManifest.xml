@@ -2,6 +2,7 @@
     package="com.cosma.studland">
 
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="studland"
