@@ -10,6 +10,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:intro_slider/intro_slider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -472,102 +473,132 @@ class _HomeState extends State<Home> {
                       )
                   ),
                   const SizedBox(height: 50),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Palette.carGreen,
-                        width: 1,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: Palette.carGreen,
+                            width: 1,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                              IntroSlider(
+                                onDonePress: () {
+                                  Navigator.pop(context);
+                                },
+                                hideStatusBar: true,
+                                skipButtonStyle: TextButton.styleFrom(
+                                  backgroundColor: Palette.raisinBlack,
+                                ),
+                                nextButtonStyle: TextButton.styleFrom(
+                                  backgroundColor: Palette.raisinBlack,
+                                ),
+                                doneButtonStyle: TextButton.styleFrom(
+                                  backgroundColor: Palette.raisinBlack,
+                                ),
+                                slides: [
+                                  Slide(
+                                      title: 'The first application dedicated entirely to students!',
+                                      description: 'This is the first application dedicated entirely to students!',
+                                      pathImage: 'assets/school.png',
+                                      backgroundColor: Colors.indigo
+
+
+                                  ),
+                                  Slide(
+                                    title: 'Discounts! Discounts everywhere!',
+                                    description: 'You can find discounts on everything you need!',
+                                    pathImage: 'assets/discounts.png',
+                                    backgroundColor: Palette.ghostWhite,
+                                    styleDescription: TextStyle(
+                                      color: Palette.raisinBlack.withOpacity(0.5),
+                                      fontSize: 18,
+                                    ),
+                                    styleTitle: TextStyle(
+                                      color: Palette.raisinBlack.withOpacity(0.5),
+                                      fontSize: 24,
+                                    ),
+
+
+                                  ),
+                                  Slide(
+                                    title: 'Jobs!',
+                                    description: 'You have access to the hottest jobs, local events and universities.',
+                                    pathImage: 'assets/jobs.png',
+                                    backgroundColor: Colors.white,
+
+                                    styleDescription: TextStyle(
+                                      color: Palette.raisinBlack.withOpacity(0.5),
+                                      fontSize: 18,
+                                    ),
+                                    styleTitle: TextStyle(
+                                      color: Palette.raisinBlack.withOpacity(0.5),
+                                      fontSize: 24,
+                                    ),
+
+
+
+
+                                  ),
+                                  Slide(
+                                    title: 'Universities!',
+                                    description: 'We want to integrate schools and universities into the application to meet all the needs of students',
+                                    pathImage: 'assets/uni_page.png',
+                                    backgroundColor: Colors.lightBlueAccent,
+                                    styleDescription: TextStyle(
+                                      color: Palette.raisinBlack.withOpacity(0.5),
+                                      fontSize: 18,
+                                    ),
+                                    styleTitle: TextStyle(
+                                      color: Palette.raisinBlack.withOpacity(0.5),
+                                      fontSize: 24,
+                                    ),
+
+
+                                  ),
+                                ],
+
+                              )
+                          ));
+                        },
+                        child: const Text(
+                          'About us',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Palette.carGreen,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                          IntroSlider(
-                            onDonePress: () {
-                              Navigator.pop(context);
-                            },
-                            hideStatusBar: true,
-                            skipButtonStyle: TextButton.styleFrom(
-                              backgroundColor: Palette.raisinBlack,
-                            ),
-                            nextButtonStyle: TextButton.styleFrom(
-                              backgroundColor: Palette.raisinBlack,
-                            ),
-                            doneButtonStyle: TextButton.styleFrom(
-                              backgroundColor: Palette.raisinBlack,
-                            ),
-                            slides: [
-                              Slide(
-                                  title: 'The first application dedicated entirely to students!',
-                                  description: 'This is the first application dedicated entirely to students!',
-                                  pathImage: 'assets/school.png',
-                                  backgroundColor: Colors.indigo
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: Colors.red,
+                            width: 1,
+                          ),
+                        ),
+                        onPressed: () async {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          prefs.remove('email');
+                          prefs.remove('password');
 
 
-                              ),
-                              Slide(
-                                title: 'Discounts! Discounts everywhere!',
-                                description: 'You can find discounts on everything you need!',
-                                pathImage: 'assets/discounts.png',
-                                backgroundColor: Palette.ghostWhite,
-                                styleDescription: TextStyle(
-                                  color: Palette.raisinBlack.withOpacity(0.5),
-                                  fontSize: 18,
-                                ),
-                                styleTitle: TextStyle(
-                                  color: Palette.raisinBlack.withOpacity(0.5),
-                                  fontSize: 24,
-                                ),
+                          Navigator.popAndPushNamed(context, '/login');
 
-
-                              ),
-                              Slide(
-                                title: 'Jobs!',
-                                description: 'You have access to the hottest jobs, local events and universities.',
-                                pathImage: 'assets/jobs.png',
-                                backgroundColor: Colors.white,
-
-                                styleDescription: TextStyle(
-                                  color: Palette.raisinBlack.withOpacity(0.5),
-                                  fontSize: 18,
-                                ),
-                                styleTitle: TextStyle(
-                                  color: Palette.raisinBlack.withOpacity(0.5),
-                                  fontSize: 24,
-                                ),
-
-
-
-
-                              ),
-                              Slide(
-                                title: 'Universities!',
-                                description: 'We want to integrate schools and universities into the application to meet all the needs of students',
-                                pathImage: 'assets/uni_page.png',
-                                backgroundColor: Colors.lightBlueAccent,
-                                styleDescription: TextStyle(
-                                  color: Palette.raisinBlack.withOpacity(0.5),
-                                  fontSize: 18,
-                                ),
-                                styleTitle: TextStyle(
-                                  color: Palette.raisinBlack.withOpacity(0.5),
-                                  fontSize: 24,
-                                ),
-
-
-                              ),
-                            ],
-
-                          )
-                      ));
-                    },
-                    child: const Text(
-                      'About us',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Palette.carGreen,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                        },
+                        child: const Text(
+                          'Log out',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      )
+                    ],
                   )
                 ],
               ),

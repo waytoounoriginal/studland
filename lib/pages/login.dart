@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:studland/colors.dart';
 import 'package:flutter_login/flutter_login.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:studland/pages/home.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -20,6 +20,9 @@ class _LoginState extends State<Login> {
   Duration get loginTime => const Duration(milliseconds: 0);
 
   Future<String?> _authUser(LoginData data) async {
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     try {
       var url = Uri.parse('https://automemeapp.com/StudLand/login.php');
       final response = await http.post(url, body: {
@@ -37,6 +40,11 @@ class _LoginState extends State<Login> {
         }
 
         if(jsondata['success']){
+
+          prefs.setString('email', data.name);
+          prefs.setString('password', data.password);
+
+
           return null;
         }
 
