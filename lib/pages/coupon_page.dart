@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -59,7 +60,16 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
   @override
   void dispose() {
     coupons.clear();
+    timer!.cancel();
     super.dispose();
+  }
+
+  Future<void> refresh() async {
+    coupons.clear();
+    await _getCoupons();
+    setState(() {
+
+    });
   }
 
   Future<int> _getCoupons() async {
@@ -90,6 +100,7 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
             var firma = jsondata[index]['firma'];
             var color = jsondata[index]['color'];
             var image = jsondata[index]['image'];
+            var valoare = jsondata[index]['value'];
 
             var range;
             if(jsondata[index]['inceput'] != null && jsondata[index]['sfarsit'] != null){
@@ -105,9 +116,9 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
 
 
 
-            if(oferta != null && firma != null && color != null){
+            if(oferta != null && firma != null && color != null && valoare != null){
               var color2 = Color(int.parse(color));
-              var cop = CopCard(color: color2, title: firma, subtitle: oferta, qrCode: jsondata[index]['nr'].toString(), validity: range, image: image,);
+              var cop = CopCard(color: color2, title: firma, subtitle: oferta, qrCode: jsondata[index]['nr'].toString(), validity: range, image: image, val: valoare,);
               setState(() {
                 coupons.add(cop);
               });
@@ -121,12 +132,13 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
 
       }
       if(coupons.isNotEmpty){
-        contColor = Color.alphaBlend(coupons[0].color, Colors.white).withOpacity(0.25);
-        title = coupons[0].title;
-        description = coupons[0].subtitle;
-        validity = '${DateFormat('dd/MM/yyyy').format(coupons[0].validity.start)} - ${DateFormat('dd/MM/yyyy').format(coupons[0].validity.end)}';
+        contColor = Color.alphaBlend(coupons[_index!].color, Colors.white).withOpacity(0.25);
+        title = coupons[_index!].title;
+        description = coupons[_index!].subtitle;
+        validity = '${DateFormat('dd/MM/yyyy').format(coupons[_index!].validity.start)} - ${DateFormat('dd/MM/yyyy').format(coupons[_index!].validity.end)}';
         textColor = calculateTextColor(contColor);
-        image = coupons[0].image;
+        image = coupons[_index!].image;
+        valoare = coupons[_index!].val;
       }
     } catch(e, stacktrace) {
       print(e);
@@ -138,9 +150,13 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
   }
 
 
-  var title, description, image, dImage, validity;
+  var title, description, image, dImage, validity, valoare;
 
   int? index;
+
+  Timer? timer;
+
+  int? _index = 0;
 
   void revealQrCode(int index) {
     showDialog(
@@ -177,8 +193,18 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
   void initState() {
 
     loading = true;
+    _index = 0;
 
     _getCoupons();
+
+    timer = Timer.periodic(const Duration(minutes: 2), (Timer t) {
+      print('Timer called');
+      refresh();
+    });
+
+
+
+
     index = 1;
 
     super.initState();
@@ -273,6 +299,7 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                         });
                         await Future.delayed(Duration(milliseconds: 500));
                         setState(() {
+                          _index = index;
                           contColor = coupons[index].color.withOpacity(0.25);
 
                           //title, description, image, dImage, validity
@@ -283,6 +310,7 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                           image = coupons[index].image;
 
                           validity = '${DateFormat('dd/MM/yyyy').format(coupons[index].validity.start)} - ${DateFormat('dd/MM/yyyy').format(coupons[index].validity.end)}';
+                          valoare = coupons[index].val;
 
 
                         });
@@ -371,12 +399,24 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 10,),
+                        FittedBox(
+                          fit: BoxFit.contain,
+                          child: Text(
+                            'Availability: ${valoare.toString()}',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: textColor.withOpacity(0.5)
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 25,),
                         SizedBox(
-                          height: 75,
+                          height: 50,
                           child: dImage != null
                               ? Image.network(dImage, height: 100, width: 100,)
-                              : Text(description, style: TextStyle(color: textColor, fontWeight: FontWeight.w300, fontSize: 20),),
+                              : FittedBox(fit: BoxFit.contain, child: Text(description, style: TextStyle(color: textColor, fontWeight: FontWeight.w300, fontSize: 20), maxLines: 3, overflow: TextOverflow.ellipsis,)),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -417,7 +457,8 @@ class CopCard extends StatelessWidget {
   final String? descrImg;
   final String? qrCode;
   final DateTimeRange validity;
-  const CopCard({Key? key, required this.color, required this.title, required this.subtitle, this.image, this.descrImg, required this.qrCode, required this.validity}) : super(key: key);
+  final int val;
+  const CopCard({Key? key, required this.color, required this.title, required this.subtitle, this.image, this.descrImg, required this.qrCode, required this.validity, required this.val}) : super(key: key);
 
   Color darken(Color c, [int percent = 10]) {
     assert(1 <= percent && percent <= 100);
@@ -444,6 +485,9 @@ class CopCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+    var textColor = calculateTextColor(color);
+
     return ClipPath(
       clipper: CouponClipper(),
       child: Container(
@@ -474,7 +518,7 @@ class CopCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: textColor.withOpacity(0.5),
                     fontSize: 15,
                     fontWeight: FontWeight.bold
                 ),
@@ -490,7 +534,7 @@ class CopCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        color: Colors.white,
+                        color: textColor,
                         fontSize: 25,
                         fontWeight: FontWeight.bold
                     ),

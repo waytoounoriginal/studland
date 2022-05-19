@@ -414,7 +414,7 @@ class _HomeState extends State<Home> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: const [
                                           Text(
-                                            'Universities',
+                                            'My school/university',
                                             style: TextStyle(
                                               fontSize: 20,
                                               color: Palette.raisinBlack,
@@ -422,7 +422,7 @@ class _HomeState extends State<Home> {
                                             ),
                                           ),
                                           Text(
-                                            'Get the best deals from the best universities.',
+                                            'Access your school/university\'s page',
                                             style: TextStyle(
                                               fontSize: 12,
                                               color: Palette.raisinBlack,
@@ -512,7 +512,7 @@ class _HomeState extends State<Home> {
                                     title: 'Discounts! Discounts everywhere!',
                                     description: 'You can find discounts on everything you need!',
                                     pathImage: 'assets/discounts.png',
-                                    backgroundColor: Palette.ghostWhite,
+                                    backgroundColor: Color(0xFFE76F51),
                                     styleDescription: TextStyle(
                                       color: Palette.raisinBlack.withOpacity(0.5),
                                       fontSize: 18,
