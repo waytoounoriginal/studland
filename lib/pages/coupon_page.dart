@@ -411,13 +411,14 @@ class _CouponsState extends State<Coupons> with TickerProviderStateMixin {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 25,),
+                        const SizedBox(height: 10,),
                         SizedBox(
-                          height: 50,
+                          height: 55,
                           child: dImage != null
                               ? Image.network(dImage, height: 100, width: 100,)
-                              : FittedBox(fit: BoxFit.contain, child: Text(description, style: TextStyle(color: textColor, fontWeight: FontWeight.w300, fontSize: 20), maxLines: 3, overflow: TextOverflow.ellipsis,)),
+                              : Text(description, style: TextStyle(color: textColor, fontWeight: FontWeight.w300), maxLines: 3, overflow: TextOverflow.ellipsis,),
                         ),
+                        const SizedBox(height: 10,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
